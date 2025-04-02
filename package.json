@@ -1,0 +1,14 @@
+{
+  "name": "homewizard-mongodb",
+  "version": "1.0.0",
+  "description": "Fetch HomeWizard data and store in MongoDB",
+  "main": "mongodb_uploader.js",
+  "scripts": {
+    "start": "node mongodb_uploader.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.3.0"
+  }
+} 

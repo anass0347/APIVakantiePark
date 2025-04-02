@@ -1,0 +1,176 @@
+{
+    "_id": {
+      "$oid": "67ea60ce7d54e154749ced87"
+    },
+    "Parkstaat": {
+      "huidigeDateTime": "2024-03-15T14:30:00",
+      "temperature": 18,
+      "zonkracht": 6,
+      "bewolking": 3,
+      "bevolking": 450,
+      "stroomnetwerk": {
+        "netwerkNaam": "VakantiePark De Zonneweide",
+        "netwerkBeschrijving": "Hoofdnetwerk voor vakantiepark met 100 kavels",
+        "netwerkType": "Smart Grid",
+        "ingress": 400.5,
+        "egress": 25.8,
+        "hoofdmeterkasten": [
+          {
+            "hoofdkabels": [
+              {
+                "diameter": 25.4,
+                "throughput": 380,
+                "lengte": 150.5,
+                "materiaal": "koper",
+                "verdeelmeterkasten": [
+                  {
+                    "SlimmeMeterId": 1001,
+                    "subkabels": [
+                      {
+                        "diameter": 15.2,
+                        "throughput": 95,
+                        "lengte": 45.5,
+                        "materiaal": "aluminium",
+                        "kavels": [
+                          {
+                            "kavelId": 1,
+                            "aantalHuizen": 4,
+                            "verbruik": 3.5,
+                            "opwekking": 2.1,
+                            "zonnepanelen": true,
+                            "huizen": [
+                              {
+                                "huisNummer": 101,
+                                "energieWeging": 1.2
+                              },
+                              {
+                                "huisNummer": 102,
+                                "energieWeging": 0.8
+                              },
+                              {
+                                "huisNummer": 103,
+                                "energieWeging": 1
+                              },
+                              {
+                                "huisNummer": 104,
+                                "energieWeging": 0.9
+                              }
+                            ]
+                          },
+                          {
+                            "kavelId": 2,
+                            "aantalHuizen": 3,
+                            "verbruik": 2.8,
+                            "opwekking": 1.9,
+                            "zonnepanelen": true,
+                            "huizen": [
+                              {
+                                "huisNummer": 105,
+                                "energieWeging": 1.1
+                              },
+                              {
+                                "huisNummer": 106,
+                                "energieWeging": 0.7
+                              },
+                              {
+                                "huisNummer": 107,
+                                "energieWeging": 1
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "SlimmeMeterId": 1002,
+                    "subkabels": [
+                      {
+                        "diameter": 15.2,
+                        "throughput": 92,
+                        "lengte": 52.3,
+                        "materiaal": "aluminium",
+                        "kavels": [
+                          {
+                            "kavelId": 3,
+                            "aantalHuizen": 5,
+                            "verbruik": 4.2,
+                            "opwekking": 2.8,
+                            "zonnepanelen": true,
+                            "huizen": [
+                              {
+                                "huisNummer": 108,
+                                "energieWeging": 1.3
+                              },
+                              {
+                                "huisNummer": 109,
+                                "energieWeging": 0.9
+                              },
+                              {
+                                "huisNummer": 110,
+                                "energieWeging": 1.1
+                              },
+                              {
+                                "huisNummer": 111,
+                                "energieWeging": 0.8
+                              },
+                              {
+                                "huisNummer": 112,
+                                "energieWeging": 1
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "diameter": 25.4,
+                "throughput": 375,
+                "lengte": 180.2,
+                "materiaal": "koper",
+                "verdeelmeterkasten": [
+                  {
+                    "SlimmeMeterId": 1003,
+                    "subkabels": [
+                      {
+                        "diameter": 15.2,
+                        "throughput": 88,
+                        "lengte": 38.7,
+                        "materiaal": "aluminium",
+                        "kavels": [
+                          {
+                            "kavelId": 4,
+                            "aantalHuizen": 3,
+                            "verbruik": 2.9,
+                            "opwekking": 1.5,
+                            "zonnepanelen": false,
+                            "huizen": [
+                              {
+                                "huisNummer": 113,
+                                "energieWeging": 1
+                              },
+                              {
+                                "huisNummer": 114,
+                                "energieWeging": 0.9
+                              },
+                              {
+                                "huisNummer": 115,
+                                "energieWeging": 1.1
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
