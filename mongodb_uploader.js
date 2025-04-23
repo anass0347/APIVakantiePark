@@ -1,9 +1,12 @@
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
 const axios = require('axios');
+const fs = require('fs');
+
 
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.2556&longitude=5.034&hourly=cloud_cover&current=cloud_cover,temperature_2m&minutely_15=shortwave_radiation_instant,temperature_2m&forecast_days=1&forecast_minutely_15=1&past_minutely_15=1&timezone=auto';
 const API_URL = 'http://178.231.21.67/api/v1/data';
+const GROWATT_API_URL = 'http://openapi.growatt.com/v1/device/inverter/invs_data?'
 const INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 async function fetchHomeWizardData() {
@@ -19,6 +22,50 @@ async function fetchHomeWizardData() {
         throw error;
     }
 }
+const inverterChaletMapping = JSON.parse(fs.readFileSync('chalet-inverter-serial-number.json', 'utf8'));
+async function fetchGrowattData(){  try {
+    const headers = {
+        'Content-Type': 'application/json',
+        'token': '9y4t16h519i1q13gce2x5kzcbun212er'
+    };
+
+    const inverters = inverterChaletMapping.map(item => item.serial_number);
+    const data = {
+        pageNum: 10 ,
+        inverters: inverters.join(',')
+    };
+
+    const response = await axios.post(
+        GROWATT_API_URL + 'pageNum='+ data.pageNum+ '&'+'inverters='+ data.inverters,
+        data,
+        { headers: headers }
+    );
+
+    const growattData = response.data;  // API respons
+    console.log(growattData);
+
+    const values = inverterChaletMapping.reduce((acc, item) => {
+        const inverterData = growattData[item.serial_number];
+        acc[item.chalet] = {
+            zonnepaneelOpwekking: inverterData
+                ? {
+                    currentWattOutput: inverterData ? inverterData.pac : null,
+                    totalKWhToday: inverterData ? inverterData.powerToday : null
+                }
+                : null
+        };
+        return acc;
+    }, {});
+
+    return values;
+
+
+    return growattData;
+} catch (error) {
+    console.error('Error fetching growatt data:', error.message);
+    throw error;
+}}
+
 
 async function fetchWeatherData() {
     try {
@@ -69,23 +116,24 @@ async function uploadToMongoDB(data) {
 async function main() {
     try {
         // Fetch data from HomeWizard
-        const homeWizardData  = await fetchHomeWizardData();
+        //const homeWizardData  = await fetchHomeWizardData();
         //Fetch data from Open-meteo
-        const weatherData = await fetchWeatherData();
-
-        const data = {
-            huidigeDateTime: weatherData.tijd, // geeft de tijd weer van laatste update weather api
-            temperature: weatherData.temperatuur,
-            bewolking: weatherData.bewolking,
-            zonkracht: weatherData.zonkracht,
-            verbruik: homeWizardData.verbruik,
-            opwekking: homeWizardData.opwekking
-        };
+        //const weatherData = await fetchWeatherData();
+        const growattData = await fetchGrowattData();
+        console.log(growattData);
+        // const data = {
+        //     huidigeDateTime: weatherData.tijd, // geeft de tijd weer van laatste update weather api
+        //     temperature: weatherData.temperatuur,
+        //     bewolking: weatherData.bewolking,
+        //     zonkracht: weatherData.zonkracht,
+        //     verbruik: homeWizardData.verbruik,
+        //     opwekking: homeWizardData.opwekking
+        // };
         // Upload to MongoDB
-        await uploadToMongoDB(data);
+      // await uploadToMongoDB(data);
         
         console.log('Process completed successfully');
-        console.log('Data saved:', data);
+      //  console.log('Data saved:', data);
         
         // Calculate and display next update time
         const nextUpdate = new Date(Date.now() + INTERVAL);
