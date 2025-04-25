@@ -42,7 +42,7 @@ async function fetchGrowattData(){  try {
     );
 
     const growattData = response.data;  // API respons
-    console.log(growattData);
+   // console.log(growattData);
 
     const values = inverterChaletMapping.reduce((acc, item) => {
         const inverterData = growattData[item.serial_number];
@@ -116,24 +116,25 @@ async function uploadToMongoDB(data) {
 async function main() {
     try {
         // Fetch data from HomeWizard
-        //const homeWizardData  = await fetchHomeWizardData();
+        const homeWizardData  = await fetchHomeWizardData();
         //Fetch data from Open-meteo
-        //const weatherData = await fetchWeatherData();
+        const weatherData = await fetchWeatherData();
         const growattData = await fetchGrowattData();
         console.log(growattData);
-        // const data = {
-        //     huidigeDateTime: weatherData.tijd, // geeft de tijd weer van laatste update weather api
-        //     temperature: weatherData.temperatuur,
-        //     bewolking: weatherData.bewolking,
-        //     zonkracht: weatherData.zonkracht,
-        //     verbruik: homeWizardData.verbruik,
-        //     opwekking: homeWizardData.opwekking
-        // };
+        const data = {
+            huidigeDateTime: weatherData.tijd, // geeft de tijd weer van laatste update weather api
+            temperature: weatherData.temperatuur,
+            bewolking: weatherData.bewolking,
+            zonkracht: weatherData.zonkracht,
+            verbruik: homeWizardData.verbruik,
+            opwekking: homeWizardData.opwekking,
+            chalets: growattData
+        };
         // Upload to MongoDB
-      // await uploadToMongoDB(data);
+       await uploadToMongoDB(data);
         
         console.log('Process completed successfully');
-      //  console.log('Data saved:', data);
+        console.log('Data saved:', data);
         
         // Calculate and display next update time
         const nextUpdate = new Date(Date.now() + INTERVAL);
