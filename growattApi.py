@@ -1,7 +1,7 @@
 import json
 import sys
 from growatt import Growatt
-
+# install this library: pip install git+https://github.com/Sanneeeee/growatt-api.git
 api = Growatt()
 api.login("Team Kapsalon", "D1gitalTw!n")
 plant_list = api.get_plants()[0]["id"]
