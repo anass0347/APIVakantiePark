@@ -1,4 +1,5 @@
 require('dotenv').config();
+const  { Growatt, statusMap } = require('./growattApi');
 const { MongoClient } = require('mongodb');
 const axios = require('axios');
 const fs = require('fs');
@@ -22,49 +23,66 @@ async function fetchHomeWizardData() {
         throw error;
     }
 }
-const inverterChaletMapping = JSON.parse(fs.readFileSync('chalet-inverter-serial-number.json', 'utf8'));
-async function fetchGrowattData(){  try {
-    const headers = {
-        'Content-Type': 'application/json',
-        'token': '9y4t16h519i1q13gce2x5kzcbun212er'
-    };
+const startValues = new Map();
+let lastRecordedDate = null;
+async function fetchGrowattData(){
 
-    const inverters = inverterChaletMapping.map(item => item.serial_number);
-    const data = {
-        pageNum: 10 ,
-        inverters: inverters.join(',')
-    };
+    const growatt = new Growatt();
+    const isLoggedIn = await growatt.login("Team Kapsalon", "D1gitalTw!n");
+    console.log(isLoggedIn);
+    if (isLoggedIn) {
+        const plants = await growatt.getPlants();
+        const plantId = plants[0].id;
 
-    const response = await axios.post(
-        GROWATT_API_URL + 'pageNum='+ data.pageNum+ '&'+'inverters='+ data.inverters,
-        data,
-        { headers: headers }
-    );
 
-    const growattData = response.data;  // API respons
-   // console.log(growattData);
+        let devices = [];
 
-    const values = inverterChaletMapping.reduce((acc, item) => {
-        const inverterData = growattData[item.serial_number];
-        acc[item.chalet] = {
-            zonnepaneelOpwekking: inverterData
-                ? {
-                    currentWattOutput: inverterData ? inverterData.pac : null,
-                    totalKWhToday: inverterData ? inverterData.powerToday : null
+        // Loop van pagina 1 t/m 5
+        for (let page = 1; page <= 5; page++) {
+            const response = await growatt.getDevicesByPlant(plantId, page);
+
+            if (response && response.obj && response.obj.datas) {
+                devices = devices.concat(response.obj.datas);
+            }
+        }
+
+        const today = new Date().toISOString().split("T")[0];
+
+        // Reset de startwaarden als het een nieuwe dag is
+        if (lastRecordedDate !== today) {
+            startValues.clear();
+            lastRecordedDate = today;
+        }
+
+        // Filter en formatteer de devices
+        const filteredDevices = devices
+            .filter(device => device.alias?.startsWith('Chalet'))
+            .map(device => {
+                const chaletId = device.alias.replace('Chalet ', '').trim();
+                const currentEToday = parseFloat(device.eToday || 0);
+
+                // Sla de beginwaarde op als die er nog niet is
+                if (!startValues.has(chaletId)) {
+                    startValues.set(chaletId, currentEToday);
                 }
-                : null
-        };
-        return acc;
-    }, {});
 
-    return values;
+                const startEToday = startValues.get(chaletId);
+                const delta = +(currentEToday - startEToday).toFixed(2); // verschil afgerond
 
+                return {
+                    chalet: chaletId,
+                    lastUpdateTime: device.lastUpdateTime || 'N/A',
+                    eToday: currentEToday,
+                    energyLast15Min: delta,
+                    status: statusMap[String(device.status)] || 'Unknown'
+                };
+            });
 
-    return growattData;
-} catch (error) {
-    console.error('Error fetching growatt data:', error.message);
-    throw error;
-}}
+        return filteredDevices;
+    } else {
+        console.log("Login is niet gelukt, geen data opgehaald.");
+    }
+}
 
 
 async function fetchWeatherData() {
@@ -116,12 +134,13 @@ async function uploadToMongoDB(data) {
 async function main() {
     try {
         // Fetch data from HomeWizard
-        const homeWizardData  = await fetchHomeWizardData();
+     //   const homeWizardData  = await fetchHomeWizardData();
         //Fetch data from Open-meteo
         const weatherData = await fetchWeatherData();
+        //Fetch growattData
         const growattData = await fetchGrowattData();
-        console.log(growattData);
-        const data = {
+
+       const data = {
             huidigeDateTime: weatherData.tijd, // geeft de tijd weer van laatste update weather api
             temperature: weatherData.temperatuur,
             bewolking: weatherData.bewolking,
