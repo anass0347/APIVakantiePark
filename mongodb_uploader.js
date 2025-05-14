@@ -7,7 +7,6 @@ const fs = require('fs');
 
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.2556&longitude=5.034&hourly=cloud_cover&current=cloud_cover,temperature_2m&minutely_15=shortwave_radiation_instant,temperature_2m&forecast_days=1&forecast_minutely_15=1&past_minutely_15=1&timezone=auto';
 const API_URL = 'http://178.231.21.67/api/v1/data';
-const GROWATT_API_URL = 'http://openapi.growatt.com/v1/device/inverter/invs_data?'
 const INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 async function fetchHomeWizardData() {
@@ -134,7 +133,7 @@ async function uploadToMongoDB(data) {
 async function main() {
     try {
         // Fetch data from HomeWizard
-     //   const homeWizardData  = await fetchHomeWizardData();
+       const homeWizardData  = await fetchHomeWizardData();
         //Fetch data from Open-meteo
         const weatherData = await fetchWeatherData();
         //Fetch growattData
