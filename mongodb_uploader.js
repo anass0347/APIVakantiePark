@@ -133,7 +133,7 @@ async function uploadToMongoDB(data) {
 async function main() {
     try {
         // Fetch data from HomeWizard
-      // const homeWizardData  = await fetchHomeWizardData();
+       const homeWizardData  = await fetchHomeWizardData();
         //Fetch data from Open-meteo
         const weatherData = await fetchWeatherData();
         //Fetch growattData
@@ -144,12 +144,12 @@ async function main() {
             temperature: weatherData.temperatuur,
             bewolking: weatherData.bewolking,
             zonkracht: weatherData.zonkracht,
-           // verbruik: homeWizardData.verbruik,
-           // opwekking: homeWizardData.opwekking,
+            verbruik: homeWizardData.verbruik,
+            opwekking: homeWizardData.opwekking,
             chalets: growattData
         };
         // Upload to MongoDB
-      // await uploadToMongoDB(data);
+       await uploadToMongoDB(data);
         
         console.log('Process completed successfully');
         console.log('Data saved:', data);
