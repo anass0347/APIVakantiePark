@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomeWizard Data</title>
+    <title>Smart Meter Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,7 +11,7 @@
             background-color: #f5f5f5;
         }
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             background-color: white;
             padding: 20px;
@@ -21,60 +21,404 @@
         h1 {
             color: #333;
             text-align: center;
+            margin-bottom: 30px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        th {
-            background-color: #f8f9fa;
+        .summary-card h3 {
+            margin: 0 0 10px 0;
+            color: #666;
+        }
+        .summary-card .value {
+            font-size: 24px;
             font-weight: bold;
+            color: #333;
         }
-        tr:hover {
-            background-color: #f5f5f5;
+        .summary-card.import { border-top: 4px solid #dc3545; }
+        .summary-card.export { border-top: 4px solid #28a745; }
+        .summary-card.total { border-top: 4px solid #007bff; }
+        
+        .meter-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 30px;
+            width: 100%;
         }
+        .meter-card {
+            width: 100%;
+            max-width: 100%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .meter-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .meter-content {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 15px;
+        }
+        .meter-data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .data-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .data-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .data-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+        }
+        .data-value.import { color: #dc3545; }
+        .data-value.export { color: #28a745; }
+        
         .timestamp {
             text-align: center;
             color: #666;
             margin-top: 20px;
+            font-size: 0.9em;
         }
         .refresh-btn {
             display: block;
             margin: 20px auto;
-            padding: 10px 20px;
+            padding: 12px 24px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s;
         }
         .refresh-btn:hover {
             background-color: #0056b3;
+        }
+        .nav-links {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-links a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #007bff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .nav-links a:hover {
+            background-color: #f0f0f0;
+        }
+        .error-message {
+            background-color: #fff3f3;
+            border: 1px solid #ffcdd2;
+            color: #dc3545;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        /* Additional styles for meter cards */
+        .meter-section {
+            margin-top: 40px;
+        }
+        .meter-section h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .meter-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .meter-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .meter-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .meter-status {
+            font-size: 0.9em;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background-color: #e9ecef;
+        }
+        .meter-status.active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .meter-status.inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .meter-status.neutral {
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+        .meter-content {
+            padding: 20px;
+        }
+        .meter-data {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .data-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .data-item:hover {
+            background: #e9ecef;
+        }
+        .data-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .data-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        .data-value.import { color: #dc3545; }
+        .data-value.export { color: #28a745; }
+        .data-value.neutral { color: #6c757d; }
+        
+        .meter-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .meter-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .detail-item {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .detail-label {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .detail-value {
+            color: #333;
+        }
+        /* Collapsible card styles */
+        .meter-card.collapsed .meter-content {
+            display: none;
+        }
+        .meter-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .collapse-arrow {
+            margin-left: 10px;
+            font-size: 1.1em;
+            transition: transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+        }
+        .collapse-arrow span {
+            margin-left: 5px;
+            font-size: 1em;
+        }
+        .meter-card.collapsed .collapse-arrow {
+            transform: rotate(-90deg);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>HomeWizard Smart Meter Data</h1>
-        <table id="dataTable">
-            <thead>
-                <tr>
-                    <th>Property</th>
-                    <th>Value</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-            </tbody>
-        </table>
-        <div class="timestamp" id="lastUpdate"></div>
-        <button class="refresh-btn" onclick="fetchData()">Refresh Data</button>
+        <h1>Smart Meter Dashboard</h1>
+        <div class="nav-links">
+            <a href="index.html">Smart Meter Data</a>
+            <a href="kenter.html">Kenter Data</a>
+        </div>
+        
+        <button class="refresh-btn" onclick="fetchAllData()">Refresh Data</button>
+        
+        <div id="verdeelkasten-container" class="meter-grid">
+            <!-- Verdeelkasten data will be displayed here -->
+        </div>
+
+        <div class="timestamp" id="last-updated">
+            Last updated: Never
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        // Function to fetch data from a single Verdeelkast
+        async function fetchVerdeelkastData(verdeelkast) {
+            try {
+                if (!verdeelkast.api_url) {
+                    return { status: 'no_url' };
+                }
+                
+                const response = await fetch(verdeelkast.api_url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error(`Error fetching data for ${verdeelkast.name}:`, error);
+                return { error: error.message };
+            }
+        }
+
+        // Function to create a card for a Verdeelkast
+        function createVerdeelkastCard(verdeelkast, data) {
+            const card = document.createElement('div');
+            card.className = 'meter-card collapsed'; // Collapsed by default
+
+            const header = document.createElement('div');
+            header.className = 'meter-header';
+
+            // Determine status based on data
+            let status = 'active';
+            let statusText = 'Active';
+            if (data.error) {
+                status = 'inactive';
+                statusText = 'Error';
+            } else if (data.status === 'no_url') {
+                status = 'neutral';
+                statusText = 'N/A';
+            }
+
+            // Add collapse arrow with text 'Details'
+            header.innerHTML = `
+                <span>${verdeelkast.name}</span>
+                <span class="meter-status ${status}">
+                    ${statusText}
+                </span>
+                <span class="collapse-arrow">&#9654;<span>Details</span></span>
+            `;
+
+            // Collapsible content
+            const content = document.createElement('div');
+            content.className = 'meter-content';
+
+            if (data.error) {
+                content.innerHTML = `
+                    <div class="error-message">
+                        Error: ${data.error}
+                    </div>
+                `;
+            } else if (data.status === 'no_url') {
+                content.innerHTML = `
+                    <div class="data-item">
+                        <div class="data-label">Status</div>
+                        <div class="data-value neutral">No API URL configured</div>
+                    </div>
+                `;
+            } else {
+                // Create a grid of data items
+                const dataGrid = document.createElement('div');
+                dataGrid.className = 'meter-data';
+
+                // Display all properties from the API response
+                for (const [key, value] of Object.entries(data)) {
+                    const dataItem = document.createElement('div');
+                    dataItem.className = 'data-item';
+                    dataItem.innerHTML = `
+                        <div class="data-label">${key}</div>
+                        <div class="data-value">${value}</div>
+                    `;
+                    dataGrid.appendChild(dataItem);
+                }
+
+                content.appendChild(dataGrid);
+            }
+
+            // Toggle collapse on header click
+            header.addEventListener('click', () => {
+                card.classList.toggle('collapsed');
+            });
+
+            card.appendChild(header);
+            card.appendChild(content);
+            return card;
+        }
+
+        // Function to fetch and display all Verdeelkasten data
+        async function fetchAllData() {
+            try {
+                const response = await fetch('huisjes.json');
+                const huisjesData = await response.json();
+                const container = document.getElementById('verdeelkasten-container');
+                container.innerHTML = ''; // Clear existing content
+
+                for (const verdeelkast of huisjesData.Verdeelkasten) {
+                    const data = await fetchVerdeelkastData(verdeelkast);
+                    const card = createVerdeelkastCard(verdeelkast, data);
+                    container.appendChild(card);
+                }
+
+                // Update timestamp
+                const now = new Date();
+                document.getElementById('last-updated').textContent = 
+                    `Last updated: ${now.toLocaleString()}`;
+            } catch (error) {
+                console.error('Error fetching Verdeelkasten data:', error);
+                const container = document.getElementById('verdeelkasten-container');
+                container.innerHTML = `
+                    <div class="error-message">
+                        Error loading Verdeelkasten data: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Fetch data when the page loads
+        document.addEventListener('DOMContentLoaded', fetchAllData);
+    </script>
 </body>
 </html> 
