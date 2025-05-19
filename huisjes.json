@@ -1,0 +1,45 @@
+{
+    "Verdeelkasten": [
+        {
+        "id": 1,
+        "name": "Verdeelkast 1",
+        "api_url": "http://188.207.29.11:4444/api/v1/data"
+        },
+        {
+        "id": 2,
+        "name": "Verdeelkast 2",
+        "api_url": ""
+        },
+        {
+        "id": 3,
+        "name": "Verdeelkast 3",
+        "api_url": ""    
+        },
+        {
+        "id": 4,
+        "name": "Verdeelkast 4",
+        "api_url": ""    
+        },
+        {
+        "id": 5,
+        "name": "Verdeelkast 5",
+        "api_url": ""    
+        },
+        {
+        "id": 6,
+        "name": "Verdeelkast 6",
+        "api_url": ""    
+        },
+        {
+        "id": 7,
+        "name": "Verdeelkast 7",
+        "api_url": ""    
+        },
+        {
+        "id": 8,
+        "name": "Verdeelkast 8",
+        "api_url": ""    
+        }
+        
+    ]
+}
