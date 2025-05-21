@@ -3,7 +3,7 @@ const  { Growatt, statusMap } = require('./growattApi');
 const { MongoClient } = require('mongodb');
 const axios = require('axios');
 const fs = require('fs');
-
+const path = require('path');
 
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.2556&longitude=5.034&hourly=cloud_cover&current=cloud_cover,temperature_2m&minutely_15=shortwave_radiation_instant,temperature_2m&forecast_days=1&forecast_minutely_15=1&past_minutely_15=1&timezone=auto';
 
@@ -80,7 +80,8 @@ async function fetchGrowattData(){
                     status: statusMap[String(device.status)] || 'Unknown'
                 };
             });
-
+        const outputPath = path.join(__dirname, 'growatt-data.json');
+        fs.writeFileSync(outputPath, JSON.stringify(filteredDevices, null, 2), 'utf8');
         return filteredDevices;
     } else {
         console.log("Login is niet gelukt, geen data opgehaald.");
