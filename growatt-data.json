@@ -1,0 +1,135 @@
+[
+  {
+    "chalet": "100",
+    "lastUpdateTime": "2025-05-21 11:42:42",
+    "eToday": 5.7,
+    "energyLast15Min": 0,
+    "status": "Online"
+  },
+  {
+    "chalet": "83",
+    "lastUpdateTime": "2025-05-21 11:42:25",
+    "eToday": 4.9,
+    "energyLast15Min": 0,
+    "status": "Online"
+  },
+  {
+    "chalet": "124",
+    "lastUpdateTime": "2025-05-21 11:44:26",
+    "eToday": 0.2,
+    "energyLast15Min": 0,
+    "status": "Online"
+  },
+  {
+    "chalet": "29",
+    "lastUpdateTime": "2025-05-21 11:44:18",
+    "eToday": 6.9,
+    "energyLast15Min": 0,
+    "status": "Online"
+  },
+  {
+    "chalet": "32",
+    "lastUpdateTime": "2025-05-21 11:42:57",
+    "eToday": 6,
+    "energyLast15Min": 0,
+    "status": "Online"
+  },
+  {
+    "chalet": "86",
+    "lastUpdateTime": "2025-05-21 11:42:33",
+    "eToday": 2.7,
+    "energyLast15Min": 0,
+    "status": "Online"
+  },
+  {
+    "chalet": "102",
+    "lastUpdateTime": "2025-05-21 11:41:39",
+    "eToday": 5.6,
+    "energyLast15Min": 0,
+    "status": "Online"
+  },
+  {
+    "chalet": "130",
+    "lastUpdateTime": "2025-05-21 11:41:36",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Fault"
+  },
+  {
+    "chalet": "122",
+    "lastUpdateTime": "2025-05-20 18:27:59",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  },
+  {
+    "chalet": "103",
+    "lastUpdateTime": "2025-04-22 20:38:09",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  },
+  {
+    "chalet": "101",
+    "lastUpdateTime": "2025-02-06 16:43:37",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  },
+  {
+    "chalet": "120",
+    "lastUpdateTime": "2024-12-02 14:13:49",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  },
+  {
+    "chalet": "123",
+    "lastUpdateTime": "2024-12-02 14:13:50",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  },
+  {
+    "chalet": "121",
+    "lastUpdateTime": "2024-12-02 14:13:40",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  },
+  {
+    "chalet": "129",
+    "lastUpdateTime": "2024-12-02 14:13:36",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  },
+  {
+    "chalet": "84",
+    "lastUpdateTime": "2024-11-25 15:02:26",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  },
+  {
+    "chalet": "90",
+    "lastUpdateTime": "2024-09-18 20:12:06",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  },
+  {
+    "chalet": "94",
+    "lastUpdateTime": "2024-04-17 07:46:31",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  },
+  {
+    "chalet": "82",
+    "lastUpdateTime": "2023-02-06 16:40:05",
+    "eToday": 0,
+    "energyLast15Min": 0,
+    "status": "Offline"
+  }
+]
