@@ -5,7 +5,8 @@
   "main": "mongodb_uploader.js",
   "scripts": {
     "start": "node mongodb_uploader.js",
-    "server": "node server.js"
+    "server": "node server.js",
+    "backend": "node backend/index.js"
   },
   "dependencies": {
     "axios": "^1.9.0",
