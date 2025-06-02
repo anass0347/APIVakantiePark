@@ -47,6 +47,13 @@ jobs:
             # Create shared network for containers if it doesn't exist
             docker network create backend-network 2>/dev/null || true
             
+            echo "📦 Installing dependencies first..."
+            # Create a temporary container to install dependencies
+            docker run --rm \
+              -v /root/backend-code:/app \
+              -w /app \
+              node:20-alpine sh -c "npm install "
+            
             echo "📦 Creating Container 1: MongoDB Uploader"
             # MongoDB Uploader Container - No port exposure needed (background service)
             docker run -d \
@@ -55,7 +62,7 @@ jobs:
               -v /root/backend-code:/app \
               -w /app \
               --restart unless-stopped \
-              node:20-alpine sh -c "npm install  && npm start"
+              node:20-alpine sh -c "sleep 5 && npm start"
             
             echo "📦 Creating Container 2: Express API Server"
             # Express API Server Container - Port 3001 (host) -> 3000 (container)
@@ -67,7 +74,7 @@ jobs:
               -w /app \
               -e PORT=3000 \
               --restart unless-stopped \
-              node:20-alpine sh -c "npm install  && npm run server"
+              node:20-alpine sh -c "sleep 5 && npm run server"
             
             echo "📦 Creating Container 3: Backend Service"
             # Backend Service Container - Port 3002 (host) -> 3000 (container)
@@ -79,10 +86,10 @@ jobs:
               -w /app \
               -e PORT=3000 \
               --restart unless-stopped \
-              node:20-alpine sh -c "npm install  && npm run backend"
+              node:20-alpine sh -c "sleep 5 && npm run backend"
             
             echo "⏳ Waiting for containers to start..."
-            sleep 15
+            sleep 20
             
             echo "=== Container Status ==="
             docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
