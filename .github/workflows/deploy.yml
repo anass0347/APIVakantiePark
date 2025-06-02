@@ -35,7 +35,7 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           source: "."
-          target: "/root/backend"  # PAS AAN: kies je eigen pad
+          target: "/root/api"  # Aparte folder voor backend
           strip_components: 1
       
       - name: Deploy Backend to Container
