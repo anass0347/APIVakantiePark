@@ -1,62 +1,166 @@
-name: Deploy Backend to Container
+name: Deploy All Applications - Separate Containers
+
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  workflow_dispatch:  # Manual trigger option
+
+env:
+  VM_HOST: ${{ secrets.VM_HOST }}
+  VM_USER: ${{ secrets.VM_USER }}
+  SSH_KEY: ${{ secrets.VM_SSH_KEY }}
+
 jobs:
-  deploy:
-    name: Deploy Backend to Container
+  deploy-backend-services:
+    name: Deploy Backend Services to Separate Containers
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
       
-      # Pas aan op basis van je backend technologie
-      - name: Setup Node  # Verander naar setup-python@v4 voor Python, etc.
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      
-      - name: Install dependencies
-        run: npm install  # Of: pip install -r requirements.txt, go mod download, etc.
-      
-      # Tests uitgeschakeld - voeg toe als je tests hebt
-      # - name: Run tests
-      #   run: npm test
-      
-      # Voor Express.js meestal geen build step nodig
-      # - name: Build backend
-      #   run: npm run build
-      
-      - name: Upload backend to VM
+      - name: Upload backend code to VM
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
+          host: ${{ env.VM_HOST }}
+          username: ${{ env.VM_USER }}
+          key: ${{ env.SSH_KEY }}
           source: "."
-          target: "/root/app/backend"  # Upload als subfolder van app  # Aparte folder voor backend
+          target: "/root/backend-code"
           strip_components: 1
+          overwrite: true
       
-      - name: Deploy Backend to Container
+      - name: Deploy to Separate Containers
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
+          host: ${{ env.VM_HOST }}
+          username: ${{ env.VM_USER }}
+          key: ${{ env.SSH_KEY }}
           script: |
-            # PAS AAN: vervang 'backend-app' door je echte container naam
-            docker exec backend-app npm install --omit=dev
+            echo "=== Creating Separate Containers for Each Service ==="
             
-            # Kill any existing screen sessions for backend
-            # PAS AAN: vervang 'backend-app' door je echte container naam
-            docker exec backend-app screen -X -S backend quit || true
+            # Stop and remove existing containers if they exist
+            echo "🛑 Stopping existing containers..."
+            docker stop mongodb-uploader express-api backend-service 2>/dev/null || true
+            docker rm mongodb-uploader express-api backend-service 2>/dev/null || true
             
-            # Start new screen session with Express server
-            # PAS AAN: vervang 'backend-app' door je echte container naam
-            # PAS AAN: vervang 'node server.js' door je start commando
-            docker exec -d backend-app screen -dmS backend sh -c "cd /app && node server.js"
+            # Create shared network for containers if it doesn't exist
+            docker network create backend-network 2>/dev/null || true
             
-            # Of als je npm scripts hebt:
-            # docker exec -d backend-app screen -dmS backend sh -c "cd /app && npm start"
-            # docker exec -d backend-app screen -dmS backend sh -c "cd /app && npm run dev"
+            echo "📦 Creating Container 1: MongoDB Uploader"
+            # MongoDB Uploader Container - No port exposure needed (background service)
+            docker run -d \
+              --name mongodb-uploader \
+              --network backend-network \
+              -v /root/backend-code:/app \
+              -w /app \
+              --restart unless-stopped \
+              node:20-alpine sh -c "npm install --omit=dev && npm start"
+            
+            echo "📦 Creating Container 2: Express API Server"
+            # Express API Server Container - Port 3001 (host) -> 3000 (container)
+            docker run -d \
+              --name express-api \
+              --network backend-network \
+              -p 3001:3000 \
+              -v /root/backend-code:/app \
+              -w /app \
+              -e PORT=3000 \
+              --restart unless-stopped \
+              node:20-alpine sh -c "npm install --omit=dev && npm run server"
+            
+            echo "📦 Creating Container 3: Backend Service"
+            # Backend Service Container - Port 3002 (host) -> 3000 (container)
+            docker run -d \
+              --name backend-service \
+              --network backend-network \
+              -p 3002:3000 \
+              -v /root/backend-code:/app \
+              -w /app \
+              -e PORT=3000 \
+              --restart unless-stopped \
+              node:20-alpine sh -c "npm install --omit=dev && npm run backend"
+            
+            echo "⏳ Waiting for containers to start..."
+            sleep 15
+            
+            echo "=== Container Status ==="
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+            
+            echo ""
+            echo "=== Service Logs (last 10 lines each) ==="
+            echo "--- MongoDB Uploader Logs ---"
+            docker logs --tail 10 mongodb-uploader 2>/dev/null || echo "No logs yet"
+            
+            echo "--- Express API Logs ---"
+            docker logs --tail 10 express-api 2>/dev/null || echo "No logs yet"
+            
+            echo "--- Backend Service Logs ---"
+            docker logs --tail 10 backend-service 2>/dev/null || echo "No logs yet"
+
+  health-check:
+    name: Health Check All Containers
+    needs: deploy-backend-services
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Verify All Containers Are Running
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.VM_HOST }}
+          username: ${{ env.VM_USER }}
+          key: ${{ env.SSH_KEY }}
+          script: |
+            echo "=== Final Health Check ==="
+            
+            # Wait for containers to fully initialize
+            sleep 10
+            
+            echo "🔍 Checking container status..."
+            RUNNING_CONTAINERS=$(docker ps --filter "name=mongodb-uploader" --filter "name=express-api" --filter "name=backend-service" --format "{{.Names}}" | wc -l)
+            echo "Found $RUNNING_CONTAINERS out of 3 containers running"
+            
+            echo ""
+            echo "📊 Container Details:"
+            docker ps --filter "name=mongodb-uploader" --filter "name=express-api" --filter "name=backend-service" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.Image}}"
+            
+            echo ""
+            echo "🌐 Port Test:"
+            echo "Testing Express API (port 3001)..."
+            curl -s -o /dev/null -w "Status: %{http_code}\n" http://localhost:3001/ || echo "Express API not responding yet"
+            
+            echo "Testing Backend Service (port 3002)..."
+            curl -s -o /dev/null -w "Status: %{http_code}\n" http://localhost:3002/ || echo "Backend Service not responding yet"
+            
+            if [ $RUNNING_CONTAINERS -eq 3 ]; then
+              echo ""
+              echo "✅ All 3 containers are running successfully!"
+              echo "🚀 Services are available at:"
+              echo "   - MongoDB Uploader: Background service (no web interface)"
+              echo "   - Express API: http://159.223.211.105:3001"
+              echo "   - Backend Service: http://159.223.211.105:3002"
+            else
+              echo ""
+              echo "⚠️  Only $RUNNING_CONTAINERS out of 3 containers are running"
+              echo "Failed containers:"
+              docker ps -a --filter "name=mongodb-uploader" --filter "name=express-api" --filter "name=backend-service" --format "table {{.Names}}\t{{.Status}}"
+            fi
+
+  notify-completion:
+    name: Deployment Notification
+    needs: [deploy-backend-services, health-check]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Deployment Status
+        run: |
+          if [ "${{ needs.deploy-backend-services.result }}" == "success" ]; then
+            echo "🎉 Backend deployment completed successfully!"
+            echo "All 3 services have been deployed:"
+            echo "  1. MongoDB Uploader (data collection)"
+            echo "  2. Express API Server (port 8081)"
+            echo "  3. Backend Service (port 8082)"
+          else
+            echo "❌ Deployment failed. Check the logs above for details."
+          fi
