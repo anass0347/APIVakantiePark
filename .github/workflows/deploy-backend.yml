@@ -55,7 +55,7 @@ jobs:
               -v /root/backend-code:/app \
               -w /app \
               --restart unless-stopped \
-              node:20-alpine sh -c "npm install --omit=dev && npm start"
+              node:20-alpine sh -c "npm install  && npm start"
             
             echo "📦 Creating Container 2: Express API Server"
             # Express API Server Container - Port 3001 (host) -> 3000 (container)
@@ -67,7 +67,7 @@ jobs:
               -w /app \
               -e PORT=3000 \
               --restart unless-stopped \
-              node:20-alpine sh -c "npm install --omit=dev && npm run server"
+              node:20-alpine sh -c "npm install  && npm run server"
             
             echo "📦 Creating Container 3: Backend Service"
             # Backend Service Container - Port 3002 (host) -> 3000 (container)
@@ -79,7 +79,7 @@ jobs:
               -w /app \
               -e PORT=3000 \
               --restart unless-stopped \
-              node:20-alpine sh -c "npm install --omit=dev && npm run backend"
+              node:20-alpine sh -c "npm install  && npm run backend"
             
             echo "⏳ Waiting for containers to start..."
             sleep 15
