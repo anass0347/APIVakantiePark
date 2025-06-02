@@ -20,9 +20,9 @@ jobs:
       - name: Install dependencies
         run: npm install  # Of: pip install -r requirements.txt, go mod download, etc.
       
-      # Optioneel: run tests
-      - name: Run tests
-        run: npm test  # Of: python -m pytest, go test, etc.
+      # Tests uitgeschakeld - voeg toe als je tests hebt
+      # - name: Run tests
+      #   run: npm test
       
       # Voor Express.js meestal geen build step nodig
       # - name: Build backend
