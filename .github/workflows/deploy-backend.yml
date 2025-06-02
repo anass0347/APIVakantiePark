@@ -18,6 +18,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
       
       - name: Upload backend code to VM
         uses: appleboy/scp-action@v0.1.4
@@ -47,12 +50,7 @@ jobs:
             # Create shared network for containers if it doesn't exist
             docker network create backend-network 2>/dev/null || true
             
-            echo "📦 Installing dependencies first..."
-            # Create a temporary container to install dependencies
-            docker run --rm \
-              -v /root/backend-code:/app \
-              -w /app \
-              node:20-alpine sh -c "npm install "
+          
             
             echo "📦 Creating Container 1: MongoDB Uploader"
             # MongoDB Uploader Container - No port exposure needed (background service)
