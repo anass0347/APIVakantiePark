@@ -11,14 +11,13 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
       
-      # Pas aan op basis van je backend technologie
-      - name: Setup Node  # Verander naar setup-python@v4 voor Python, etc.
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
       
       - name: Install dependencies
-        run: npm install  # Of: pip install -r requirements.txt, go mod download, etc.
+        run: npm install
       
       # Tests uitgeschakeld - voeg toe als je tests hebt
       # - name: Run tests
@@ -35,7 +34,7 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           source: "."
-          target: "/root/api"  # Aparte folder voor backend
+          target: "/root/api"
           strip_components: 1
       
       - name: Deploy Backend to Container
@@ -45,18 +44,11 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            # PAS AAN: vervang 'backend-app' door je echte container naam
-            docker exec backend-app npm install --omit=dev
+            # Ga naar backend directory en install dependencies
+            docker exec nextjs-app-fixed sh -c "cd /api && npm install --omit=dev"
             
             # Kill any existing screen sessions for backend
-            # PAS AAN: vervang 'backend-app' door je echte container naam
-            docker exec backend-app screen -X -S backend quit || true
+            docker exec nextjs-app-fixed screen -X -S backend quit || true
             
-            # Start new screen session with Express server
-            # PAS AAN: vervang 'backend-app' door je echte container naam
-            # PAS AAN: vervang 'node server.js' door je start commando
-            docker exec -d backend-app screen -dmS backend sh -c "cd /app && node server.js"
-            
-            # Of als je npm scripts hebt:
-            # docker exec -d backend-app screen -dmS backend sh -c "cd /app && npm start"
-            # docker exec -d backend-app screen -dmS backend sh -c "cd /app && npm run dev"
+            # Start new screen session with Express server (poort 3001)
+            docker exec -d nextjs-app-fixed screen -dmS backend sh -c "cd /api && PORT=3001 npm run server"
