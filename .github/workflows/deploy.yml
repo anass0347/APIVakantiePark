@@ -35,7 +35,7 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           source: "."
-          target: "/root/backend"  # Andere directory dan frontend
+          target: "/root/backend"  # PAS AAN: kies je eigen pad
           strip_components: 1
       
       - name: Deploy Backend to Container
@@ -45,13 +45,16 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            # Install dependencies inside container
+            # PAS AAN: vervang 'backend-app' door je echte container naam
             docker exec backend-app npm install --omit=dev
             
             # Kill any existing screen sessions for backend
+            # PAS AAN: vervang 'backend-app' door je echte container naam
             docker exec backend-app screen -X -S backend quit || true
             
             # Start new screen session with Express server
+            # PAS AAN: vervang 'backend-app' door je echte container naam
+            # PAS AAN: vervang 'node server.js' door je start commando
             docker exec -d backend-app screen -dmS backend sh -c "cd /app && node server.js"
             
             # Of als je npm scripts hebt:
