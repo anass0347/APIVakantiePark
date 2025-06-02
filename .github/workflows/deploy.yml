@@ -1,0 +1,59 @@
+name: Deploy Backend to Container
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    name: Deploy Backend to Container
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      # Pas aan op basis van je backend technologie
+      - name: Setup Node  # Verander naar setup-python@v4 voor Python, etc.
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm install  # Of: pip install -r requirements.txt, go mod download, etc.
+      
+      # Optioneel: run tests
+      - name: Run tests
+        run: npm test  # Of: python -m pytest, go test, etc.
+      
+      # Voor Express.js meestal geen build step nodig
+      # - name: Build backend
+      #   run: npm run build
+      
+      - name: Upload backend to VM
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "."
+          target: "/root/backend"  # Andere directory dan frontend
+          strip_components: 1
+      
+      - name: Deploy Backend to Container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            # Install dependencies inside container
+            docker exec backend-app npm install --omit=dev
+            
+            # Kill any existing screen sessions for backend
+            docker exec backend-app screen -X -S backend quit || true
+            
+            # Start new screen session with Express server
+            docker exec -d backend-app screen -dmS backend sh -c "cd /app && node server.js"
+            
+            # Of als je npm scripts hebt:
+            # docker exec -d backend-app screen -dmS backend sh -c "cd /app && npm start"
+            # docker exec -d backend-app screen -dmS backend sh -c "cd /app && npm run dev"
