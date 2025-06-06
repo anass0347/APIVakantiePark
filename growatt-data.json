@@ -1,58 +1,58 @@
 [
   {
+    "chalet": "124",
+    "lastUpdateTime": "2025-05-22 16:01:33",
+    "eToday": 0.3,
+    "energyLast15Min": 0.1,
+    "status": "Online"
+  },
+  {
+    "chalet": "32",
+    "lastUpdateTime": "2025-05-22 15:57:27",
+    "eToday": 11.7,
+    "energyLast15Min": 3.9,
+    "status": "Online"
+  },
+  {
+    "chalet": "29",
+    "lastUpdateTime": "2025-05-22 16:00:44",
+    "eToday": 13.7,
+    "energyLast15Min": 3,
+    "status": "Online"
+  },
+  {
     "chalet": "100",
-    "lastUpdateTime": "2025-05-22 14:42:41",
-    "eToday": 11,
-    "energyLast15Min": 0,
+    "lastUpdateTime": "2025-05-22 16:02:55",
+    "eToday": 13.2,
+    "energyLast15Min": 3.4,
+    "status": "Online"
+  },
+  {
+    "chalet": "102",
+    "lastUpdateTime": "2025-05-22 16:00:45",
+    "eToday": 8.1,
+    "energyLast15Min": 1.6,
     "status": "Online"
   },
   {
     "chalet": "86",
-    "lastUpdateTime": "2025-05-22 14:40:33",
-    "eToday": 5.9,
-    "energyLast15Min": 0,
+    "lastUpdateTime": "2025-05-22 16:00:35",
+    "eToday": 7.7,
+    "energyLast15Min": 3,
     "status": "Online"
   },
   {
     "chalet": "130",
-    "lastUpdateTime": "2025-05-22 14:39:31",
+    "lastUpdateTime": "2025-05-22 15:59:36",
     "eToday": 0,
     "energyLast15Min": 0,
     "status": "Fault"
   },
   {
-    "chalet": "32",
-    "lastUpdateTime": "2025-05-22 14:41:01",
-    "eToday": 10,
-    "energyLast15Min": 0,
-    "status": "Online"
-  },
-  {
-    "chalet": "102",
-    "lastUpdateTime": "2025-05-22 14:40:43",
-    "eToday": 7.2,
-    "energyLast15Min": 0,
-    "status": "Online"
-  },
-  {
     "chalet": "83",
-    "lastUpdateTime": "2025-05-22 14:39:37",
-    "eToday": 4.6,
-    "energyLast15Min": 0,
-    "status": "Online"
-  },
-  {
-    "chalet": "29",
-    "lastUpdateTime": "2025-05-22 14:41:33",
-    "eToday": 11.8,
-    "energyLast15Min": 0,
-    "status": "Online"
-  },
-  {
-    "chalet": "124",
-    "lastUpdateTime": "2025-05-22 14:41:31",
-    "eToday": 0.2,
-    "energyLast15Min": 0,
+    "lastUpdateTime": "2025-05-22 15:59:39",
+    "eToday": 5.7,
+    "energyLast15Min": 1.6,
     "status": "Online"
   },
   {

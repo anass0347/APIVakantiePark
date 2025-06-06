@@ -7,6 +7,35 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Add caching middleware
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+
+// Cache middleware
+function cacheMiddleware(duration) {
+  return (req, res, next) => {
+    const key = req.originalUrl;
+    const cachedResponse = cache.get(key);
+    
+    if (cachedResponse && Date.now() - cachedResponse.timestamp < duration) {
+      return res.json(cachedResponse.data);
+    }
+    
+    res.sendResponse = res.json;
+    res.json = (body) => {
+      cache.set(key, {
+        timestamp: Date.now(),
+        data: body
+      });
+      res.sendResponse(body);
+    };
+    next();
+  };
+}
+
+// Apply cache middleware to the usage endpoint
+app.use('/api/kenter/usage', cacheMiddleware(CACHE_DURATION));
+
 // Kenter API config (use .env for secrets in production)
 const KENTER_AUTH_URL = 'https://login.kenter.nu/connect/token';
 const KENTER_CONNECTION_ID = '871685900041061903'; // <--  real connectionId
@@ -53,6 +82,65 @@ async function getAccessToken() {
   return data.access_token;
 }
 
+// Helper function to convert timestamp to readable format
+function convertTimestamp(timestamp) {
+  if (!timestamp) return null;
+  // If timestamp is in seconds, convert to milliseconds
+  if (timestamp < 1000000000000) { // crude check: less than year 33658 in ms
+    timestamp = timestamp * 1000;
+  }
+  const date = new Date(timestamp);
+  return date.toLocaleString('nl-NL', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+}
+
+// Helper function to aggregate measurements
+function aggregateMeasurements(measurements) {
+  if (!measurements || !Array.isArray(measurements)) return [];
+  
+  // Group measurements by hour
+  const hourlyData = measurements.reduce((acc, measurement) => {
+    const date = new Date(measurement.timestamp);
+    const hourKey = date.toISOString().slice(0, 13); // YYYY-MM-DDTHH
+    
+    if (!acc[hourKey]) {
+      acc[hourKey] = {
+        timestamp: convertTimestamp(measurement.timestamp),
+        values: [],
+        count: 0
+      };
+    }
+    
+    // Only keep essential fields
+    const essentialData = {
+      value: measurement.value,
+      unit: measurement.unit,
+      type: measurement.type
+    };
+    
+    acc[hourKey].values.push(essentialData);
+    acc[hourKey].count++;
+    
+    return acc;
+  }, {});
+  
+  // Calculate averages and format the data
+  return Object.values(hourlyData).map(hour => ({
+    timestamp: hour.timestamp,
+    averageValue: hour.values.reduce((sum, v) => sum + v.value, 0) / hour.count,
+    unit: hour.values[0].unit,
+    type: hour.values[0].type,
+    measurementCount: hour.count
+  }));
+}
+
 // Proxy endpoint for usage data
 app.get('/api/kenter/usage', async (req, res) => {
   try {
@@ -89,25 +177,35 @@ app.get('/api/kenter/usage', async (req, res) => {
     }
     
     const data = await apiRes.json();
-    console.log('Raw API Response data:', JSON.stringify(data, null, 2));
     
-    // Check if we have measurements and their structure
-    if (data.measurements) {
-      console.log('Number of measurements:', data.measurements.length);
-      if (data.measurements.length > 0) {
-        console.log('Sample measurement structure:', JSON.stringify(data.measurements[0], null, 2));
-      }
-    } else {
-      console.log('No measurements found in response');
+    // Convert every timestamp in every nested Measurements array to a human-readable string, but keep the original timestamp as well
+    if (Array.isArray(data)) {
+      data.forEach(channel => {
+        if (channel.Measurements && Array.isArray(channel.Measurements)) {
+          channel.Measurements.forEach(measurement => {
+            if (measurement.timestamp) {
+              const converted = convertTimestamp(measurement.timestamp);
+              console.log('Converted timestamp:', converted);
+              measurement.timestamp_readable = converted;
+            }
+          });
+        }
+      });
     }
-    
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// Endpoint to clear the backend cache via GET request
+app.get('/api/kenter/clear-cache', (req, res) => {
+  cache.clear();
+  res.json({ message: 'Cache cleared' });
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Kenter backend proxy running on port ${PORT}`);
 }); 
+

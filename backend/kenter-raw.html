@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kenter Raw JSON Viewer</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 2em;
+    }
+    .container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 2em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-width: 900px;
+      margin: auto;
+    }
+    pre {
+      background: #222;
+      color: #b5f4a5;
+      padding: 1em;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    button {
+      margin-bottom: 1em;
+      padding: 0.5em 1em;
+      font-size: 1em;
+      border-radius: 4px;
+      border: none;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .error {
+      color: #c00;
+      margin-bottom: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Kenter Raw JSON Data</h1>
+    <button onclick="fetchData()">Fetch Data</button>
+    <div id="error" class="error"></div>
+    <pre id="json"></pre>
+  </div>
+  <script>
+    async function fetchData() {
+      const url = 'https://api.kenter.nu/meetdata/v2/meters';
+      const jsonEl = document.getElementById('json');
+      const errorEl = document.getElementById('error');
+      jsonEl.textContent = '';
+      errorEl.textContent = '';
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+        }
+        const data = await response.json();
+        jsonEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        errorEl.textContent = 'Error: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
